@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="layouts/main :: html">
+<div th:fragment="content">
+    <!-- Sales Header -->
+    <div class="page-header">
+        <h1><i class="fas fa-shopping-cart"></i> Sales</h1>
+        <p>Track your sales history</p>
+    </div>
+
+    <!-- Quick Sale Section -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-bolt"></i> Quick Sale</h3>
+        </div>
+        <div class="card-body">
+            <div class="quick-sale-form">
+                <select id="quickProductSelect" class="form-input">
+                    <option value="">Select Product</option>
+                </select>
+                <input type="number" id="quickQuantity" placeholder="Quantity" class="form-input" min="1">
+                <button class="btn btn-success" onclick="quickSale()">
+                    <i class="fas fa-shopping-cart"></i> Make Sale
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales History -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Sales History</h3>
+            <div class="table-actions">
+                <input type="date" id="salesDateFilter" class="form-input">
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesTableBody">
+                        <tr>
+                            <td colspan="5" class="empty-state">
+                                <i class="fas fa-shopping-cart"></i>
+                                <p>No sales found</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

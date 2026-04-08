@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="layouts/main :: html">
+<div th:fragment="content">
+    <!-- Dashboard Header -->
+    <div class="page-header">
+        <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+        <p>Overview of your stock management system</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card primary">
+            <div class="stat-icon">
+                <i class="fas fa-boxes"></i>
+            </div>
+            <div class="stat-content">
+                <h3 th:text="${totalProducts}">0</h3>
+                <p>Total Products</p>
+            </div>
+        </div>
+        
+        <div class="stat-card warning">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-content">
+                <h3 th:text="${#lists.size(lowStockProducts)}">0</h3>
+                <p>Low Stock Items</p>
+            </div>
+        </div>
+        
+        <div class="stat-card success">
+            <div class="stat-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="stat-content">
+                <h3 th:text="${#lists.size(recentSales)}">0</h3>
+                <p>Recent Sales</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Low Stock Alert -->
+    <div th:if="${#lists.size(lowStockProducts) > 0}" class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>Low Stock Alert!</strong> You have <span th:text="${#lists.size(lowStockProducts)}"></span> products with low inventory.
+    </div>
+
+    <!-- Recent Sales & Low Stock Tables -->
+    <div class="grid-2">
+        <!-- Recent Sales -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-clock"></i> Recent Sales</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table th:if="${!#lists.isEmpty(recentSales)}">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="sale : ${recentSales}">
+                                <td th:text="${sale.product.name}">Product Name</td>
+                                <td th:text="${sale.quantity}">0</td>
+                                <td th:text="${sale.date}">2024-01-01</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div th:if="${#lists.isEmpty(recentSales)}" class="empty-state">
+                        <i class="fas fa-shopping-cart"></i>
+                        <p>No recent sales</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Products -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Low Stock</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table th:if="${!#lists.isEmpty(lowStockProducts)}">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Stock</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="product : ${lowStockProducts}">
+                                <td th:text="${product.name}">Product</td>
+                                <td th:text="${product.quantity}">0</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" th:onclick="'restockProduct(' + ${product.id} + ')'">
+                                        <i class="fas fa-plus"></i> Restock
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div th:if="${#lists.isEmpty(lowStockProducts)}" class="empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <p>All products in good stock</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

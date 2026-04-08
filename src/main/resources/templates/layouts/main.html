@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title ?: 'Stock Management System'}">Stock Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-warehouse"></i> StockPro</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a th:href="@{/dashboard}" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a th:href="@{/products}" class="nav-item">
+                    <i class="fas fa-box"></i>
+                    <span>Products</span>
+                </a>
+                <a th:href="@{/sales}" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Sales</span>
+                </a>
+
+                
+                
+
+
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+               <div class="topbar-right">
+                    <div class="user-profile">
+                        <i class="fas fa-user"></i>
+                        <span th:text="${#authentication.name}">User</span>
+                    </div><br>
+
+                    <!-- ✅ LOGOUT BUTTON -->
+                    <form th:action="@{/logout}" method="post" style="margin-left: 10px;">
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </form>
+                </div>
+
+            </header>
+
+            <!-- Page Content -->
+            <div class="page-content">
+                <th:block th:replace="~{::content}"></th:block>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
