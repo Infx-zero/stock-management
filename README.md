@@ -30,5 +30,17 @@ A full-stack Stock Management System built using Java and Spring Boot, designed 
 3. Run the project using:
 
 
+## 📸 Screenshots
+
+### Login Page
+![Login](screenshots/login.png)
+
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+### Products
+![Products](screenshots/products.png)
+
+
 ## 👨‍💻 Author
 Suyog
