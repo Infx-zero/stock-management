@@ -36,10 +36,14 @@ A full-stack Stock Management System built using Java and Spring Boot, designed 
 ![Login](screenshots/login.png)
 
 ### Dashboard
-![Dashboard](screenshots/dashboard.png)
+![Dashboard](screenshots/Dashboard.png)
 
 ### Products
-![Products](screenshots/products.png)
+![Products](screenshots/Products.png)
+
+### Sales
+![Sales](screenshots/Sales.png)
+
 
 
 ## 👨‍💻 Author
