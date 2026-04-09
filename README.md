@@ -27,7 +27,14 @@ A full-stack Stock Management System built using Java and Spring Boot, designed 
 ## ⚙️ How to Run
 1. Clone the repository  
 2. Configure database in `application.properties`  
-3. Run the project using:
+
+## 🌐 Live Demo
+👉 https://stock-management-8pp8.onrender.com
+
+## 🔑 Demo Login
+Username: Admin
+Password: admin@123
+Deployed using Docker on Render (Cloud Platform)
 
 
 ## 📸 Screenshots
