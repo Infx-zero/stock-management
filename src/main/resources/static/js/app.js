@@ -6,6 +6,8 @@ let editingProductId = null;
 document.addEventListener('DOMContentLoaded', function() {
     initApp();
     loadProducts();
+    initParticles(); // ✨ NEW: Particle system
+    initScrollReveal(); // ✨ NEW: Scroll animations
 });
 
 // ===== INITIALIZATION =====
@@ -33,29 +35,156 @@ function initApp() {
     
     // Load products for quick sale
     loadQuickSaleProducts();
+    
+    // ✨ NEW: Enhanced interactions
+    initEnhancedInteractions();
 }
 
-// ===== SIDEBAR TOGGLE =====
+// ===== ENHANCED INTERACTIONS =====
+function initEnhancedInteractions() {
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
+    // Intersection Observer for animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    // Observe all animatable elements
+    document.querySelectorAll('.card, .stat-card, .table-container, .btn').forEach(el => {
+        observer.observe(el);
+    });
+}
+
+// ===== SIDEBAR TOGGLE (ENHANCED) =====
 function toggleSidebar() {
-    document.querySelector('.sidebar').classList.toggle('collapsed');
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    
+    sidebar.classList.toggle('collapsed');
+    
+    // ✨ NEW: Enhanced mobile support
+    if (window.innerWidth <= 768) {
+        sidebar.classList.toggle('mobile-open');
+    }
+    
+    // ✨ NEW: Body scroll lock for mobile
+    if (sidebar.classList.contains('mobile-open')) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = 'auto';
+    }
 }
 
-// ===== MODAL FUNCTIONS =====
+// ===== PARTICLE SYSTEM ✨
+function initParticles() {
+    const particlesContainer = document.createElement('div');
+    particlesContainer.className = 'particles';
+    document.body.appendChild(particlesContainer);
+    
+    let particleCount = 0;
+    const maxParticles = 50;
+    
+    function createParticle() {
+        if (particleCount >= maxParticles) return;
+        
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        // Random properties
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDuration = (Math.random() * 3 + 4) + 's';
+        particle.style.animationDelay = Math.random() * 2 + 's';
+        particle.style.opacity = Math.random() * 0.5 + 0.3;
+        particle.style.width = Math.random() * 6 + 3 + 'px';
+        particle.style.height = particle.style.width;
+        
+        particlesContainer.appendChild(particle);
+        particleCount++;
+        
+        // Remove particle after animation
+        setTimeout(() => {
+            particle.remove();
+            particleCount--;
+        }, 8000);
+    }
+    
+    // Create particles continuously
+    setInterval(createParticle, 400);
+    
+    // Responsive particle count
+    window.addEventListener('resize', () => {
+        if (window.innerWidth < 768) {
+            maxParticles = 25;
+        } else {
+            maxParticles = 50;
+        }
+    });
+}
+
+// ===== SCROLL REVEAL ANIMATIONS ✨
+function initScrollReveal() {
+    // Staggered animations for stats cards
+    const statsCards = document.querySelectorAll('.stat-card');
+    statsCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+}
+
+// ===== MODAL FUNCTIONS (ENHANCED) =====
 function openModal(modalId) {
-    document.getElementById(modalId).classList.add('active');
+    const modal = document.getElementById(modalId);
+    modal.classList.add('active');
     document.body.style.overflow = 'hidden';
+    
+    // ✨ NEW: Focus trap for accessibility
+    modal.focus();
+    
+    // ✨ NEW: Enhanced entrance animation
+    setTimeout(() => {
+        modal.querySelector('.modal-content').classList.add('animate-in');
+    }, 50);
 }
 
 function closeModal(modalId) {
-    document.getElementById(modalId).classList.remove('active');
+    const modal = document.getElementById(modalId);
+    modal.classList.remove('active');
+    modal.querySelector('.modal-content')?.classList.remove('animate-in');
     document.body.style.overflow = 'auto';
     resetProductForm();
 }
 
-// Close modals when clicking outside
+// Close modals when clicking outside or ESC key
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('modal')) {
         closeModal(e.target.id);
+    }
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const activeModal = document.querySelector('.modal.active');
+        if (activeModal) {
+            closeModal(activeModal.id);
+        }
     }
 });
 
@@ -67,6 +196,7 @@ async function loadProducts() {
         renderProductsTable(products);
         loadQuickSaleProducts();
         loadSalesHistory();
+        updateStats(); // ✨ NEW: Live stats update
     } catch (error) {
         console.error('Error loading products:', error);
         showNotification('Failed to load products', 'error');
@@ -90,7 +220,7 @@ function renderProductsTable(productsToRender = products) {
     }
 
     tbody.innerHTML = productsToRender.map(product => `
-        <tr>
+        <tr class="table-row" data-aos="fade-up">
             <td>${product.id}</td>
             <td>${product.name}</td>
             <td>$${parseFloat(product.price).toFixed(2)}</td>
@@ -102,27 +232,65 @@ function renderProductsTable(productsToRender = products) {
             <td><span class="status-badge active">Active</span></td>
             <td>
                 ${product.quantity > 0 ? `
-                    <button class="btn btn-sm btn-success" onclick="makeSale(${product.id}, ${product.price})">
-                        <i class="fas fa-shopping-cart"></i>
+                    <button class="btn btn-sm btn-success" onclick="makeSale(${product.id}, ${product.price})" data-ripple>
+                        <i class="fas fa-shopping-cart"></i> Sell
                     </button>
                 ` : ''}
-                <button class="btn btn-sm btn-warning" onclick="editProduct(${product.id})">
+                <button class="btn btn-sm btn-warning" onclick="editProduct(${product.id})" data-ripple>
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})">
+                <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})" data-ripple>
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
         </tr>
     `).join('');
+    
+    // ✨ NEW: Add ripple effect to buttons
+    initRippleEffect();
 }
 
 function filterProducts() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const filtered = products.filter(product => 
-        product.name.toLowerCase().includes(searchTerm)
+        product.name.toLowerCase().includes(searchTerm) ||
+        product.id.toString().includes(searchTerm)
     );
     renderProductsTable(filtered);
+}
+
+// ===== RIPPLE EFFECT ✨
+function initRippleEffect() {
+    document.querySelectorAll('[data-ripple]').forEach(button => {
+        button.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+            `;
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
 }
 
 async function handleProductForm(e) {
@@ -203,10 +371,24 @@ async function deleteProduct(id) {
     }
 }
 
+// ===== STATS UPDATER ✨
+function updateStats() {
+    const totalProducts = products.length;
+    const lowStock = products.filter(p => p.quantity <= 5).length;
+    const totalValue = products.reduce((sum, p) => sum + (p.price * p.quantity), 0);
+    
+    // Update stat cards if they exist
+    const totalProductsEl = document.querySelector('.stat-card.primary h3');
+    const lowStockEl = document.querySelector('.stat-card.warning h3');
+    const totalValueEl = document.querySelector('.stat-card.success h3');
+    
+    if (totalProductsEl) totalProductsEl.textContent = totalProducts;
+    if (lowStockEl) lowStockEl.textContent = lowStock;
+    if (totalValueEl) totalValueEl.textContent = `$${totalValue.toLocaleString()}`;
+}
+
 // ===== SALES MANAGEMENT =====
-// In app.js, update the makeSale function:
 async function makeSale(productId) {
-    // Get product details first
     const product = products.find(p => p.id === productId);
     if (!product || product.quantity === 0) {
         showNotification('Product not available or out of stock', 'error');
@@ -220,7 +402,7 @@ async function makeSale(productId) {
     }
     
     try {
-        await fetch(`/api/sales/${productId}/${quantity}`, {  // ✅ Fixed endpoint
+        await fetch(`/api/sales/${productId}/${quantity}`, {
             method: 'POST'
         });
         
@@ -243,7 +425,7 @@ async function quickSale() {
     
     try {
         await fetch(`/api/sales/${productId}/${quantity}`, {
-         method: 'POST'
+            method: 'POST'
         });
         
         showNotification(`Quick sale completed! ${quantity} units sold.`, 'success');
@@ -284,7 +466,7 @@ function updateQuickSaleQuantity() {
 
 async function loadSalesHistory() {
     try {
-        const response = await fetch('/api/sales'); // You'll need to add this endpoint
+        const response = await fetch('/api/sales');
         const sales = await response.json();
         renderSalesTable(sales);
     } catch (error) {
@@ -309,7 +491,7 @@ function renderSalesTable(sales) {
     }
 
     tbody.innerHTML = sales.map(sale => `
-        <tr>
+        <tr class="table-row" data-aos="fade-up">
             <td>${new Date(sale.date).toLocaleDateString()}</td>
             <td>${sale.product?.name || 'N/A'}</td>
             <td>${sale.quantity}</td>
@@ -319,24 +501,31 @@ function renderSalesTable(sales) {
     `).join('');
 }
 
-// ===== UTILITY FUNCTIONS =====
+// ===== ENHANCED NOTIFICATION SYSTEM ✨
 function showNotification(message, type = 'success') {
-    // Create notification
     const notification = document.createElement('div');
-    notification.className = `alert alert-${type === 'success' ? 'success' : 'error'}`;
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'warning'}`;
     notification.innerHTML = `
         <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
-        ${message}
+        <span>${message}</span>
+        <button class="notification-close" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+        </button>
     `;
     
-    // Add to page
-    document.querySelector('.page-content').insertBefore(notification, document.querySelector('.page-content').firstChild);
+    const pageContent = document.querySelector('.page-content');
+    pageContent.insertBefore(notification, pageContent.firstChild);
     
-    // Auto remove
+    // Animate in
+    requestAnimationFrame(() => {
+        notification.classList.add('animate-in');
+    });
+    
+    // Auto remove with animation
     setTimeout(() => {
-        notification.style.opacity = '0';
+        notification.classList.add('animate-out');
         setTimeout(() => notification.remove(), 300);
-    }, 4000);
+    }, 5000);
 }
 
 // ===== EVENT DELEGATION FOR DYNAMIC ELEMENTS =====
@@ -352,17 +541,66 @@ document.addEventListener('click', function(e) {
         const productId = e.target.closest('[onclick*="restockProduct"]').getAttribute('onclick').match(/(\d+)/)[1];
         restockProduct(productId);
     }
+    
+    // Quick sale button
+    if (e.target.closest('#quickSaleBtn')) {
+        quickSale();
+    }
 });
 
 function restockProduct(productId) {
     const quantity = prompt('Enter quantity to restock:');
     if (quantity && quantity > 0) {
-        // This would update the product quantity via API
         showNotification(`Restocked ${quantity} units (implement API call)`, 'success');
+        loadProducts();
     }
 }
 
-// ===== AUTO-REFRESH (OPTIONAL) =====
+// ===== AUTO-REFRESH WITH THROTTLING ✨
+let refreshTimeout;
+function scheduleRefresh() {
+    clearTimeout(refreshTimeout);
+    refreshTimeout = setTimeout(() => {
+        loadProducts();
+    }, 5000); // Throttled refresh
+}
+
+// Replace the old interval with this:
+let lastRefresh = 0;
 setInterval(() => {
-    loadProducts();
-}, 30000); // Refresh every 30 seconds
+    const now = Date.now();
+    if (now - lastRefresh > 30000) { // 30 seconds
+        loadProducts();
+        lastRefresh = now;
+    }
+}, 5000);
+
+// ===== PERFORMANCE MONITORING ✨
+function monitorPerformance() {
+    if ('performance' in window) {
+        const navigation = performance.getEntriesByType('navigation')[0];
+        console.log('Page load time:', navigation.loadEventEnd - navigation.loadEventStart, 'ms');
+    }
+}
+
+// Run on load
+monitorPerformance();
+
+// ===== MOBILE MENU SUPPORT ✨
+window.addEventListener('resize', function() {
+    const sidebar = document.querySelector('.sidebar');
+    if (window.innerWidth > 768) {
+        sidebar.classList.remove('mobile-open');
+        document.body.style.overflow = 'auto';
+    }
+});
+
+// Export functions for global access
+window.toggleSidebar = toggleSidebar;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.makeSale = makeSale;
+window.editProduct = editProduct;
+window.deleteProduct = deleteProduct;
+window.quickSale = quickSale;
+window.restockProduct = restockProduct;
